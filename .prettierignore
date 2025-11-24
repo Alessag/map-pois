@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+build
+coverage
+
+# Lock files
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+
+# Logs
+*.log
+
+# IDE
+.idea
+.vscode
+
+# Git
+.git
+.gitignore
+
+# Misc
+*.min.js
+*.min.css

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+#Linter
+yarn lint-staged
