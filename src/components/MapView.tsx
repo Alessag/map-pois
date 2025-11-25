@@ -7,6 +7,8 @@ import { useBuildingStore } from '../store/useBuildingStore';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+const SITUM_DOMAIN = 'https://dashboard.situm.com';
+
 const MapView = () => {
   const building = useBuildingStore((state) => state.building);
   const pois = useBuildingStore((state) => state.getFilteredPois());
@@ -102,8 +104,40 @@ const MapView = () => {
       });
 
       pois.map((poi) => {
-        console.log('POI on map:', poi.name, poi.location);
-        new maplibregl.Marker().setLngLat([poi.location.lng, poi.location.lat]).addTo(map);
+        // Popup for each poi when marker is clicked
+        const popup = new maplibregl.Popup({ offset: 30 }).setText(poi.name);
+
+        // Icon URL from Situm dashboard
+        const iconUrl = `${SITUM_DOMAIN}${poi.categories[0].iconUrl}`;
+        const selectedIconUrl = `${SITUM_DOMAIN}${poi.categories[0].selectedIconUrl}`;
+
+        console.log(poi.categories[0].iconUrl);
+
+        // Create a custom HTML element for the marker
+        const el = document.createElement('div');
+        el.className = 'poi-marker';
+        el.style.backgroundImage = `url(${iconUrl})`;
+        el.style.width = '32px';
+        el.style.height = '32px';
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+        el.style.cursor = 'pointer';
+
+        // Change icon when popup opens
+        popup.on('open', () => {
+          el.style.backgroundImage = `url(${selectedIconUrl})`;
+        });
+
+        // Revert icon when popup closes
+        popup.on('close', () => {
+          el.style.backgroundImage = `url(${iconUrl})`;
+        });
+
+        //create a marker for each poi
+        new maplibregl.Marker({ element: el })
+          .setLngLat([poi.location.lng, poi.location.lat])
+          .setPopup(popup)
+          .addTo(map);
       });
     });
 
