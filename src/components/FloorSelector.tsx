@@ -1,0 +1,63 @@
+import clsx from 'clsx';
+
+import { useBuildingStore } from '../store/useBuildingStore';
+
+/**
+ * Floor selector component
+ * Allows users to filter POIs by floor
+ */
+export function FloorSelector() {
+  const floors = useBuildingStore((state) => state.floors);
+  const selectedFloorId = useBuildingStore((state) => state.selectedFloorId);
+  const setSelectedFloorId = useBuildingStore((state) => state.setSelectedFloorId);
+
+  if (floors.length === 0) {
+    return null;
+  }
+
+  // Sort floors by floor level
+  const sortedFloors = [...floors].sort((a, b) => b.level - a.level);
+
+  return (
+    <div className="space-y-2 border-2 border-black">
+      <label className="text-sm font-medium text-gray-700">Filter by Floor</label>
+      <div className="flex flex-wrap gap-2">
+        {/* All floors option */}
+        <button
+          onClick={() => setSelectedFloorId(null)}
+          className={clsx(
+            'cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+            {
+              'bg-blue-600 text-white shadow-sm': selectedFloorId === null,
+              'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50':
+                selectedFloorId !== null,
+            }
+          )}
+        >
+          All Floors
+        </button>
+
+        {/* Individual floor buttons */}
+        {sortedFloors.map((floor) => (
+          <button
+            key={floor.id}
+            onClick={() => {
+              setSelectedFloorId(floor.id);
+            }}
+            className={clsx(
+              'cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+              {
+                'bg-blue-600 text-white shadow-sm': selectedFloorId === floor.id,
+                'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50':
+                  selectedFloorId !== floor.id,
+              }
+            )}
+            title={`Floor ${floor.level}: ${floor.name}`}
+          >
+            {floor.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
