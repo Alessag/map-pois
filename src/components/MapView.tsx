@@ -8,6 +8,14 @@ import { useBuildingStore } from '../store/useBuildingStore';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const SITUM_DOMAIN = 'https://dashboard.situm.com';
+const MARKER_SIZE = 32;
+const POI_FLY_TO_ZOOM = 20;
+const POI_FLY_TO_DURATION = 500;
+const BUILDING_MARKER_COLOR = '#2563eb';
+const BUILDING_FILL_COLOR = '#088';
+const BUILDING_FILL_OPACITY = 0.1;
+const BUILDING_BORDER_WIDTH = 2;
+const FLOOR_PLAN_OPACITY = 0.85;
 
 type Corner = { lat: number; lng: number };
 
@@ -67,7 +75,9 @@ const MapView = () => {
 
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
-    const marker = new maplibregl.Marker({ color: '#2563eb' }).setLngLat([lng, lat]).addTo(map);
+    const marker = new maplibregl.Marker({ color: BUILDING_MARKER_COLOR })
+      .setLngLat([lng, lat])
+      .addTo(map);
 
     mapRef.current = map;
     markerRef.current = marker;
@@ -104,8 +114,8 @@ const MapView = () => {
         type: 'fill',
         source: 'building-outline',
         paint: {
-          'fill-color': '#088',
-          'fill-opacity': 0.1,
+          'fill-color': BUILDING_FILL_COLOR,
+          'fill-opacity': BUILDING_FILL_OPACITY,
         },
       });
 
@@ -115,8 +125,8 @@ const MapView = () => {
         type: 'line',
         source: 'building-outline',
         paint: {
-          'line-color': '#088',
-          'line-width': 2,
+          'line-color': BUILDING_FILL_COLOR,
+          'line-width': BUILDING_BORDER_WIDTH,
         },
       });
 
@@ -141,7 +151,7 @@ const MapView = () => {
         type: 'raster',
         source: 'floor-plan',
         paint: {
-          'raster-opacity': 0.85,
+          'raster-opacity': FLOOR_PLAN_OPACITY,
           'raster-fade-duration': 0,
         },
       });
@@ -159,8 +169,8 @@ const MapView = () => {
         const el = document.createElement('div');
         el.className = 'poi-marker';
         el.style.backgroundImage = `url(${iconUrl})`;
-        el.style.width = '32px';
-        el.style.height = '32px';
+        el.style.width = `${MARKER_SIZE}px`;
+        el.style.height = `${MARKER_SIZE}px`;
         el.style.backgroundSize = 'cover';
         el.style.backgroundPosition = 'center';
         el.style.cursor = 'pointer';
@@ -202,7 +212,9 @@ const MapView = () => {
     if (!building || !mapRef.current) return;
 
     const { lat, lng } = building.location;
+
     mapRef.current.setCenter([lng, lat]);
+
     if (markerRef.current) {
       markerRef.current.setLngLat([lng, lat]);
     }
@@ -216,7 +228,6 @@ const MapView = () => {
     const marker = markersRef.current.get(selectedPoi.id);
     if (!marker) return;
 
-    // Cerrar cualquier popup abierto primero
     markersRef.current.forEach((m) => {
       const popup = m.getPopup();
       if (popup?.isOpen()) {
@@ -224,16 +235,14 @@ const MapView = () => {
       }
     });
 
-    // Abrir el popup del POI seleccionado
     marker.togglePopup();
 
-    // Centrar el mapa en el POI seleccionado
     map.flyTo({
       center: [selectedPoi.location.lng, selectedPoi.location.lat],
-      zoom: 20,
-      duration: 500,
+      zoom: POI_FLY_TO_ZOOM,
+      duration: POI_FLY_TO_DURATION,
     });
-  }, [selectedPoi]); // <-- Añadir selectedPoi como dependencia
+  }, [selectedPoi]);
 
   if (!building) {
     return (
