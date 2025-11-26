@@ -89,7 +89,7 @@ export const MapView = () => {
     };
   }, [building]);
 
-  // use Effect 2: Manage floor layer
+  // Manage floor layer
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !isMapReady || !building) return;
@@ -128,7 +128,7 @@ export const MapView = () => {
     }
   }, [building, floors, isMapReady, selectedFloorId]);
 
-  // Effect 3: Manage POI markers
+  // Manage POI markers
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !isMapReady) return;
@@ -145,8 +145,18 @@ export const MapView = () => {
 
       const el = createPoiMarkerElement({ iconUrl, selectedIconUrl });
 
-      // TODO: Improve the POI info display
-      const popup = new maplibregl.Popup({ offset: 30 }).setText(`${poi.name} ${poi.info}`);
+      const popup = new maplibregl.Popup({
+        offset: 30,
+        maxWidth: '400px',
+        className: 'poi-popup',
+      }).setHTML(`
+        <div style="max-height: 400px; overflow-y: auto;">
+          <h3 style="margin: 0 0 8px 0; font-weight: bold; font-size: 16px;">${poi.name}</h3>
+          <div style="word-wrap: break-word; overflow-wrap: break-word;">
+            ${poi.info || ''}
+          </div>
+        </div>
+      `);
 
       popup.on('open', () => {
         el.style.backgroundImage = `url(${el.dataset.selectedIconUrl})`;
@@ -175,7 +185,7 @@ export const MapView = () => {
     };
   }, [isMapReady, pois, setSelectedPoiId]);
 
-  // Effect 4: Keep map/marker in sync if building location changes
+  // Keep map/marker in sync if building location changes
   useEffect(() => {
     if (!building || !mapRef.current) return;
 
@@ -184,7 +194,7 @@ export const MapView = () => {
     mapRef.current.setCenter([lng, lat]);
   }, [building]);
 
-  // Effect 5: React when a POI is selected from the sidebar
+  // React when a POI is selected from the sidebar
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !selectedPoi) return;

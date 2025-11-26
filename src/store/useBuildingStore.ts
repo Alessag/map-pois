@@ -2,20 +2,17 @@ import type { Building, Floor, Poi, PoiCategory } from '@situm/sdk-js';
 import { create } from 'zustand';
 
 interface BuildingStore {
-  // Data state
   building: Building | null;
   floors: Floor[];
   pois: Poi[];
   poiCategories: PoiCategory[];
 
-  // UI state
   selectedPoiId: number | null;
   selectedFloorId: number | null;
   searchQuery: string;
   isLoading: boolean;
   error: string | null;
 
-  // Actions
   setBuilding: (building: Building) => void;
   setFloors: (floors: Floor[]) => void;
   setPois: (pois: Poi[]) => void;
@@ -27,7 +24,6 @@ interface BuildingStore {
   setError: (error: string | null) => void;
   reset: () => void;
 
-  // Computed/derived data
   getFilteredPois: () => Poi[];
   getFloorById: (floorId: number) => Floor | undefined;
   getPoiById: (poiId: number) => Poi | undefined;
@@ -54,7 +50,6 @@ let lastFilteredPois: Poi[] = initialState.pois;
 export const useBuildingStore = create<BuildingStore>((set, get) => ({
   ...initialState,
 
-  // Actions
   setBuilding: (building) => set({ building }),
   setFloors: (floors) => set({ floors }),
   setPois: (pois) => set({ pois }),
@@ -66,7 +61,6 @@ export const useBuildingStore = create<BuildingStore>((set, get) => ({
   setError: (error) => set({ error }),
   reset: () => set(initialState),
 
-  // Computed/derived data
   getFilteredPois: () => {
     const { pois, selectedFloorId, searchQuery } = get();
 
