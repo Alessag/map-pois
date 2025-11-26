@@ -77,6 +77,27 @@ const createPoiMarkerElement = ({
 };
 //-----------
 
+// TODO: Move to maps utils maybe(?)
+interface BuildingOutlineData {
+  type: 'Feature';
+  properties: { name: string };
+  geometry: {
+    type: 'Polygon';
+    coordinates: [number, number][][];
+  };
+}
+
+const createBuildingOutlineData = (name: string, corners: Corner[]): BuildingOutlineData => ({
+  type: 'Feature',
+  properties: { name },
+  geometry: {
+    type: 'Polygon',
+    coordinates: [corners.map((corner) => [corner.lng, corner.lat])],
+  },
+});
+
+//-----
+
 const MapView = () => {
   const building = useBuildingStore((state) => state.building);
   const pois = useBuildingStore((state) => state.getFilteredPois());
@@ -127,14 +148,7 @@ const MapView = () => {
 
       map.addSource('building-outline', {
         type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: { name: building.name },
-          geometry: {
-            type: 'Polygon',
-            coordinates: [building.corners.map((corner) => [corner.lng, corner.lat])],
-          },
-        },
+        data: createBuildingOutlineData(building.name, building.corners),
       });
 
       // Add fill layer
