@@ -41,7 +41,15 @@ class SitumService {
   async getFloors(buildingId: number) {
     try {
       const floors = await this.sdk.cartography.getFloors({ buildingId });
-      return floors;
+      // Adjust property name to match expected format
+      return floors.map((floor) => ({
+        ...floor,
+        maps: {
+          ...floor.maps,
+          /* eslint-disable  @typescript-eslint/no-explicit-any */
+          map_url: (floor.maps as any).mapUrl,
+        },
+      }));
     } catch (error) {
       console.error('Failed to fetch floors:', error);
       throw error;

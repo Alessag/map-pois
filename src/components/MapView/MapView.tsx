@@ -92,7 +92,7 @@ export const MapView = () => {
     const map = mapRef.current;
     if (!map || !isMapReady || !building) return;
 
-    const floorMapUrl = getFloorById(floors, selectedFloorId)?.maps.mapUrl;
+    const floorMapUrl = getFloorById(floors, selectedFloorId)?.maps.map_url;
     const sourceId = 'floor-plan';
     const layerId = LAYER_CONFIG.floorPlan.id;
 
