@@ -135,9 +135,8 @@ const MapView = () => {
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
-  const markerRef = useRef<Marker | null>(null);
-  // Mapa para guardar referencias a los marcadores de POIs por ID
-  const markersRef = useRef<Map<number, Marker>>(new Map());
+  const buildingMarkerRef = useRef<Marker | null>(null);
+  const poiMarkersRef = useRef<Map<number, Marker>>(new Map());
 
   // Initialize the map once the building is available
   useEffect(() => {
@@ -163,7 +162,7 @@ const MapView = () => {
       .addTo(map);
 
     mapRef.current = map;
-    markerRef.current = marker;
+    buildingMarkerRef.current = marker;
 
     map.on('load', () => {
       if (paddedBounds) {
@@ -212,8 +211,8 @@ const MapView = () => {
         paint: LAYER_CONFIG.floorPlan.paint,
       });
 
-      markersRef.current.forEach((m) => m.remove());
-      markersRef.current.clear();
+      poiMarkersRef.current.forEach((m) => m.remove());
+      poiMarkersRef.current.clear();
 
       pois.forEach((poi) => {
         const iconUrl = `${SITUM_DOMAIN}${poi.categories[0].iconUrl}`;
@@ -243,17 +242,17 @@ const MapView = () => {
           .setPopup(popup)
           .addTo(map);
 
-        markersRef.current.set(poi.id, poiMarker);
+        poiMarkersRef.current.set(poi.id, poiMarker);
       });
     });
 
     return () => {
-      markersRef.current.forEach((m) => m.remove());
-      markersRef.current.clear();
+      poiMarkersRef.current.forEach((m) => m.remove());
+      poiMarkersRef.current.clear();
       marker.remove();
       map.remove();
       mapRef.current = null;
-      markerRef.current = null;
+      buildingMarkerRef.current = null;
     };
   }, [building, floors, pois, selectedFloorId, setSelectedPoiId]);
 
@@ -265,8 +264,8 @@ const MapView = () => {
 
     mapRef.current.setCenter([lng, lat]);
 
-    if (markerRef.current) {
-      markerRef.current.setLngLat([lng, lat]);
+    if (buildingMarkerRef.current) {
+      buildingMarkerRef.current.setLngLat([lng, lat]);
     }
   }, [building]);
 
@@ -275,10 +274,10 @@ const MapView = () => {
     const map = mapRef.current;
     if (!map || !selectedPoi) return;
 
-    const marker = markersRef.current.get(selectedPoi.id);
+    const marker = poiMarkersRef.current.get(selectedPoi.id);
     if (!marker) return;
 
-    markersRef.current.forEach((m) => {
+    poiMarkersRef.current.forEach((m) => {
       const popup = m.getPopup();
       if (popup?.isOpen()) {
         popup.remove();
