@@ -143,7 +143,10 @@ const MapView = () => {
 
         popup.on('close', () => {
           el.style.backgroundImage = `url(${iconUrl})`;
-          setSelectedPoiId(null);
+          const currentSelected = useBuildingStore.getState().selectedPoiId;
+          if (currentSelected === poi.id) {
+            setSelectedPoiId(null);
+          }
         });
 
         const poiMarker = new maplibregl.Marker({ element: el })
