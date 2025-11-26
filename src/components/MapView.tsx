@@ -42,6 +42,11 @@ const getPaddedBounds = (corners: Corner[], paddingDegrees: number) => {
   );
 };
 
+const getFloorById = (floors: Floor[], floorId: number | null) => {
+  if (floorId === null) return null;
+  return floors.find((floor) => floor.id === floorId) || null;
+};
+
 const MapView = () => {
   const building = useBuildingStore((state) => state.building);
   const pois = useBuildingStore((state) => state.getFilteredPois());
@@ -89,12 +94,6 @@ const MapView = () => {
           maxZoom: MAP_CONFIG.MAX_ZOOM,
         });
       }
-      // map.addSource('floorplan', {
-      //   // GeoJSON Data source used in vector tiles, documented at
-      //   // https://gist.github.com/ryanbaumann/a7d970386ce59d11c16278b90dde094d
-      //   type: 'geojson',
-      //   data: 'https://api.situm.com/api/v1/vectormaps/7033/7033_20251119074703.geojson',
-      // });
 
       map.addSource('building-outline', {
         type: 'geojson',
@@ -130,14 +129,9 @@ const MapView = () => {
         },
       });
 
-      const getFloorById = (floorId: number | null) => {
-        if (floorId === null) return null;
-        return floors.find((floor) => floor.id === floorId) || null;
-      };
-
       map.addSource('floor-plan', {
         type: 'image',
-        url: getFloorById(selectedFloorId)?.maps.mapUrl,
+        url: getFloorById(floors, selectedFloorId)?.maps.mapUrl,
         coordinates: [
           [-8.426001, 43.352942],
           [-8.423549, 43.352517],
