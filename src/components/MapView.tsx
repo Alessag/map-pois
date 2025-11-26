@@ -29,8 +29,8 @@ const MapView = () => {
       style: MAP_CONFIG.STYLE_URL,
       center: [lng, lat],
       zoom: MAP_CONFIG.DEFAULT_ZOOM,
-      // minZoom: MAP_CONFIG.MIN_ZOOM,
-      // maxZoom: MAP_CONFIG.MAX_ZOOM,
+      minZoom: MAP_CONFIG.MIN_ZOOM,
+      maxZoom: MAP_CONFIG.MAX_ZOOM,
     });
 
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
