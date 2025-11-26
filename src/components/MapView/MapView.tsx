@@ -5,12 +5,13 @@ import maplibregl, { type Map as MapLibreMap, type Marker } from 'maplibre-gl';
 import { MAP_CONFIG } from '../../config/constants.ts';
 import { useBuildingStore } from '../../store/useBuildingStore';
 
-import { LAYER_CONFIG, POI_FLY_TO_DURATION, POI_FLY_TO_ZOOM, SITUM_DOMAIN } from './constants.ts';
+import { LAYER_CONFIG, POI_FLY_TO_DURATION, POI_FLY_TO_ZOOM } from './constants.ts';
 import {
   createBuildingOutlineData,
   createPoiMarkerElement,
   getFloorById,
   getPaddedBounds,
+  normalizeIconUrl,
 } from './utils.ts';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -22,6 +23,7 @@ export const MapView = () => {
   const floors = useBuildingStore((state) => state.floors);
   const selectedPoi = useBuildingStore((state) => state.getPoiById(state.selectedPoiId ?? -1));
   const setSelectedPoiId = useBuildingStore((state) => state.setSelectedPoiId);
+  const getPoiCategoryById = useBuildingStore((state) => state.getPoiCategoryById);
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -136,8 +138,10 @@ export const MapView = () => {
     markers.clear();
 
     pois.forEach((poi) => {
-      const iconUrl = `${SITUM_DOMAIN}${poi.categories[0].iconUrl}`;
-      const selectedIconUrl = `${SITUM_DOMAIN}${poi.categories[0].selectedIconUrl}`;
+      const poiCategory = getPoiCategoryById(poi.categoryId);
+
+      const iconUrl = normalizeIconUrl(poiCategory?.iconUrl ?? '');
+      const selectedIconUrl = normalizeIconUrl(poiCategory?.selectedIconUrl ?? '');
 
       const el = createPoiMarkerElement({ iconUrl, selectedIconUrl });
 

@@ -1,7 +1,7 @@
 import type { Floor } from '@situm/sdk-js';
 import maplibregl from 'maplibre-gl';
 
-import { MARKER_SIZE } from './constants';
+import { MARKER_SIZE, SITUM_DOMAIN } from './constants';
 import type { BuildingOutlineData, Corner, CreatePoiMarkerElementParams } from './types';
 
 export const getPaddedBounds = (corners: Corner[], paddingDegrees: number) => {
@@ -42,6 +42,20 @@ export const createBuildingOutlineData = (
 export const getFloorById = (floors: Floor[], floorId: number | null) => {
   if (floorId === null) return null;
   return floors.find((floor) => floor.id === floorId) || null;
+};
+
+export const normalizeIconUrl = (url: string): string => {
+  if (!url) return '';
+
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  if (url.startsWith('/')) {
+    return `${SITUM_DOMAIN}${url}`;
+  }
+
+  return `${SITUM_DOMAIN}/${url}`;
 };
 
 export const createPoiMarkerElement = ({

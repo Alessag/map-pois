@@ -66,18 +66,25 @@ class SitumService {
     }
   }
 
+  async getPOICategories() {
+    const categories = await this.sdk.cartography.getPoiCategories();
+    return categories;
+  }
+
   async getBuildingData(buildingId: number) {
     try {
-      const [building, floors, pois] = await Promise.all([
+      const [building, floors, pois, categories] = await Promise.all([
         this.getBuildingInfo(buildingId),
         this.getFloors(buildingId),
         this.getPOIs(buildingId),
+        this.getPOICategories(),
       ]);
 
       return {
         building,
         floors,
         pois,
+        categories,
       };
     } catch (error) {
       console.error('Failed to fetch building data:', error);

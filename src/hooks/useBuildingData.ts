@@ -7,6 +7,7 @@ export function useBuildingData(buildingId: number) {
   const setBuilding = useBuildingStore((state) => state.setBuilding);
   const setFloors = useBuildingStore((state) => state.setFloors);
   const setPois = useBuildingStore((state) => state.setPois);
+  const setPoiCategories = useBuildingStore((state) => state.setPoiCategories);
   const setLoading = useBuildingStore((state) => state.setLoading);
   const setError = useBuildingStore((state) => state.setError);
   const setSelectedFloorId = useBuildingStore((state) => state.setSelectedFloorId);
@@ -24,13 +25,15 @@ export function useBuildingData(buildingId: number) {
       setError(null);
 
       try {
-        const { building, floors, pois } = await situmService.getBuildingData(buildingId);
+        const { building, floors, pois, categories } =
+          await situmService.getBuildingData(buildingId);
 
         if (isMounted) {
           setBuilding(building);
           setFloors(Array.from(floors));
           setSelectedFloorId(floors[0]?.id ?? null);
           setPois(pois);
+          setPoiCategories(categories);
           setLoading(false);
         }
       } catch (err) {
@@ -47,7 +50,16 @@ export function useBuildingData(buildingId: number) {
     return () => {
       isMounted = false;
     };
-  }, [buildingId, setBuilding, setFloors, setPois, setLoading, setError]);
+  }, [
+    buildingId,
+    setBuilding,
+    setFloors,
+    setPois,
+    setPoiCategories,
+    setLoading,
+    setError,
+    setSelectedFloorId,
+  ]);
 
   return { isLoading, error };
 }

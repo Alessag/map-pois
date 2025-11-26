@@ -1,4 +1,4 @@
-import type { Building, Floor, Poi } from '@situm/sdk-js';
+import type { Building, Floor, Poi, PoiCategory } from '@situm/sdk-js';
 import { create } from 'zustand';
 
 interface BuildingStore {
@@ -6,6 +6,7 @@ interface BuildingStore {
   building: Building | null;
   floors: Floor[];
   pois: Poi[];
+  poiCategories: PoiCategory[];
 
   // UI state
   selectedPoiId: number | null;
@@ -18,6 +19,7 @@ interface BuildingStore {
   setBuilding: (building: Building) => void;
   setFloors: (floors: Floor[]) => void;
   setPois: (pois: Poi[]) => void;
+  setPoiCategories: (poiCategories: PoiCategory[]) => void;
   setSelectedPoiId: (id: number | null) => void;
   setSelectedFloorId: (id: number | null) => void;
   setSearchQuery: (query: string) => void;
@@ -29,12 +31,14 @@ interface BuildingStore {
   getFilteredPois: () => Poi[];
   getFloorById: (floorId: number) => Floor | undefined;
   getPoiById: (poiId: number) => Poi | undefined;
+  getPoiCategoryById: (poiCategoryId: number) => PoiCategory | undefined;
 }
 
 const initialState = {
   building: null,
   floors: [],
   pois: [],
+  poiCategories: [],
   selectedPoiId: null,
   selectedFloorId: null,
   searchQuery: '',
@@ -54,8 +58,9 @@ export const useBuildingStore = create<BuildingStore>((set, get) => ({
   setBuilding: (building) => set({ building }),
   setFloors: (floors) => set({ floors }),
   setPois: (pois) => set({ pois }),
-  setSelectedPoiId: (id) => set({ selectedPoiId: id }),
-  setSelectedFloorId: (id) => set({ selectedFloorId: id }),
+  setPoiCategories: (poiCategories) => set({ poiCategories }),
+  setSelectedPoiId: (poiId) => set({ selectedPoiId: poiId }),
+  setSelectedFloorId: (floorId) => set({ selectedFloorId: floorId }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),
@@ -75,19 +80,15 @@ export const useBuildingStore = create<BuildingStore>((set, get) => ({
 
     let filtered = pois;
 
-    // Filter by floor
     if (selectedFloorId !== null) {
       filtered = filtered.filter((poi) => poi.floorId === selectedFloorId);
     }
 
-    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (poi) => poi.name.toLowerCase().includes(query)
-        //||
-        // poi.description?.toLowerCase().includes(query) ||
-        // poi.category?.name.toLowerCase().includes(query)
+        (poi) =>
+          poi.name.toLowerCase().includes(query) || poi.categoryName.toLowerCase().includes(query)
       );
     }
 
@@ -107,7 +108,7 @@ export const useBuildingStore = create<BuildingStore>((set, get) => ({
     return get().pois.find((poi) => poi.id === poiId);
   },
 
-  getBuilding: () => {
-    return get().building;
+  getPoiCategoryById: (categoryId) => {
+    return get().poiCategories.find((cat) => cat.id === categoryId);
   },
 }));
