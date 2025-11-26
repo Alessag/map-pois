@@ -47,6 +47,36 @@ const getFloorById = (floors: Floor[], floorId: number | null) => {
   return floors.find((floor) => floor.id === floorId) || null;
 };
 
+// TODO: Move to maps utils or something like that
+//---------------
+interface CreatePoiMarkerElementParams {
+  iconUrl: string;
+  selectedIconUrl: string;
+  size?: number;
+}
+
+const createPoiMarkerElement = ({
+  iconUrl,
+  selectedIconUrl,
+  size = MARKER_SIZE,
+}: CreatePoiMarkerElementParams): HTMLDivElement => {
+  const el = document.createElement('div');
+
+  el.className = 'poi-marker';
+  el.style.backgroundImage = `url(${iconUrl})`;
+  el.style.width = `${size}px`;
+  el.style.height = `${size}px`;
+  el.style.backgroundSize = 'cover';
+  el.style.backgroundPosition = 'center';
+  el.style.cursor = 'pointer';
+
+  el.dataset.iconUrl = iconUrl;
+  el.dataset.selectedIconUrl = selectedIconUrl;
+
+  return el;
+};
+//-----------
+
 const MapView = () => {
   const building = useBuildingStore((state) => state.building);
   const pois = useBuildingStore((state) => state.getFilteredPois());
@@ -153,30 +183,24 @@ const MapView = () => {
       markersRef.current.forEach((m) => m.remove());
       markersRef.current.clear();
 
-      pois.map((poi) => {
-        // TODO: Well, improve the info  poi
-        const popup = new maplibregl.Popup({ offset: 30 }).setText(`${poi.name} ${poi.info}`);
-
+      pois.forEach((poi) => {
         const iconUrl = `${SITUM_DOMAIN}${poi.categories[0].iconUrl}`;
         const selectedIconUrl = `${SITUM_DOMAIN}${poi.categories[0].selectedIconUrl}`;
 
-        const el = document.createElement('div');
-        el.className = 'poi-marker';
-        el.style.backgroundImage = `url(${iconUrl})`;
-        el.style.width = `${MARKER_SIZE}px`;
-        el.style.height = `${MARKER_SIZE}px`;
-        el.style.backgroundSize = 'cover';
-        el.style.backgroundPosition = 'center';
-        el.style.cursor = 'pointer';
+        const el = createPoiMarkerElement({ iconUrl, selectedIconUrl });
+
+        // TODO: Well, improve the info  poi
+        const popup = new maplibregl.Popup({ offset: 30 }).setText(`${poi.name} ${poi.info}`);
 
         popup.on('open', () => {
-          el.style.backgroundImage = `url(${selectedIconUrl})`;
+          el.style.backgroundImage = `url(${el.dataset.selectedIconUrl})`;
           setSelectedPoiId(poi.id);
         });
 
         popup.on('close', () => {
-          el.style.backgroundImage = `url(${iconUrl})`;
+          el.style.backgroundImage = `url(${el.dataset.iconUrl})`;
           const currentSelected = useBuildingStore.getState().selectedPoiId;
+
           if (currentSelected === poi.id) {
             setSelectedPoiId(null);
           }
