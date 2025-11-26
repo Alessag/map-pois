@@ -98,6 +98,33 @@ const createBuildingOutlineData = (name: string, corners: Corner[]): BuildingOut
 
 //-----
 
+const LAYER_CONFIG = {
+  buildingFill: {
+    id: 'building-fill',
+    type: 'fill' as const,
+    paint: {
+      'fill-color': BUILDING_FILL_COLOR,
+      'fill-opacity': BUILDING_FILL_OPACITY,
+    },
+  },
+  buildingBorder: {
+    id: 'building-border',
+    type: 'line' as const,
+    paint: {
+      'line-color': BUILDING_FILL_COLOR,
+      'line-width': BUILDING_BORDER_WIDTH,
+    },
+  },
+  floorPlan: {
+    id: 'floor-plan-layer',
+    type: 'raster' as const,
+    paint: {
+      'raster-opacity': FLOOR_PLAN_OPACITY,
+      'raster-fade-duration': 0,
+    },
+  },
+} as const;
+
 const MapView = () => {
   const building = useBuildingStore((state) => state.building);
   const pois = useBuildingStore((state) => state.getFilteredPois());
@@ -153,24 +180,18 @@ const MapView = () => {
 
       // Add fill layer
       map.addLayer({
-        id: 'building-fill',
-        type: 'fill',
+        id: LAYER_CONFIG.buildingFill.id,
+        type: LAYER_CONFIG.buildingFill.type,
         source: 'building-outline',
-        paint: {
-          'fill-color': BUILDING_FILL_COLOR,
-          'fill-opacity': BUILDING_FILL_OPACITY,
-        },
+        paint: LAYER_CONFIG.buildingFill.paint,
       });
 
       // Add outline layer
       map.addLayer({
-        id: 'building-border',
-        type: 'line',
+        id: LAYER_CONFIG.buildingBorder.id,
+        type: LAYER_CONFIG.buildingBorder.type,
         source: 'building-outline',
-        paint: {
-          'line-color': BUILDING_FILL_COLOR,
-          'line-width': BUILDING_BORDER_WIDTH,
-        },
+        paint: LAYER_CONFIG.buildingBorder.paint,
       });
 
       map.addSource('floor-plan', {
@@ -185,13 +206,10 @@ const MapView = () => {
       });
 
       map.addLayer({
-        id: 'floor-plan-layer',
-        type: 'raster',
+        id: LAYER_CONFIG.floorPlan.id,
+        type: LAYER_CONFIG.floorPlan.type,
         source: 'floor-plan',
-        paint: {
-          'raster-opacity': FLOOR_PLAN_OPACITY,
-          'raster-fade-duration': 0,
-        },
+        paint: LAYER_CONFIG.floorPlan.paint,
       });
 
       markersRef.current.forEach((m) => m.remove());
