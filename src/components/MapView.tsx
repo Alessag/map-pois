@@ -9,6 +9,31 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 const SITUM_DOMAIN = 'https://dashboard.situm.com';
 
+type Corner = { lat: number; lng: number };
+
+const getPaddedBounds = (corners: Corner[], paddingDegrees: number) => {
+  if (!corners.length) return null;
+
+  const initialBounds = new maplibregl.LngLatBounds(
+    [corners[0].lng, corners[0].lat],
+    [corners[0].lng, corners[0].lat]
+  );
+
+  const bounds = corners
+    .slice(1)
+    .reduce((acc, corner) => acc.extend([corner.lng, corner.lat]), initialBounds);
+
+  if (!paddingDegrees) return bounds;
+
+  const sw = bounds.getSouthWest();
+  const ne = bounds.getNorthEast();
+
+  return new maplibregl.LngLatBounds(
+    [sw.lng - paddingDegrees, sw.lat - paddingDegrees],
+    [ne.lng + paddingDegrees, ne.lat + paddingDegrees]
+  );
+};
+
 const MapView = () => {
   const building = useBuildingStore((state) => state.building);
   const pois = useBuildingStore((state) => state.getFilteredPois());
@@ -28,6 +53,8 @@ const MapView = () => {
     if (!building || !mapContainerRef.current || mapRef.current) return;
 
     const { lat, lng } = building.location;
+
+    const paddedBounds = getPaddedBounds(building.corners ?? [], MAP_CONFIG.BOUNDS_PADDING_DEGREES);
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
       style: MAP_CONFIG.STYLE_URL,
@@ -35,6 +62,7 @@ const MapView = () => {
       zoom: MAP_CONFIG.DEFAULT_ZOOM,
       minZoom: MAP_CONFIG.MIN_ZOOM,
       maxZoom: MAP_CONFIG.MAX_ZOOM,
+      maxBounds: paddedBounds ?? undefined,
     });
 
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
@@ -45,6 +73,12 @@ const MapView = () => {
     markerRef.current = marker;
 
     map.on('load', () => {
+      if (paddedBounds) {
+        map.fitBounds(paddedBounds, {
+          padding: MAP_CONFIG.BOUNDS_PADDING,
+          maxZoom: MAP_CONFIG.MAX_ZOOM,
+        });
+      }
       // map.addSource('floorplan', {
       //   // GeoJSON Data source used in vector tiles, documented at
       //   // https://gist.github.com/ryanbaumann/a7d970386ce59d11c16278b90dde094d
@@ -86,8 +120,6 @@ const MapView = () => {
         },
       });
 
-      console.log('Building floors:', building.floors);
-
       const getFloorById = (floorId: number | null) => {
         if (floorId === null) return null;
         return floors.find((floor) => floor.id === floorId) || null;
@@ -114,18 +146,15 @@ const MapView = () => {
         },
       });
 
-      // Limpiar marcadores anteriores
       markersRef.current.forEach((m) => m.remove());
       markersRef.current.clear();
 
       pois.map((poi) => {
-        // TODO: WEll, improve the info  poi
+        // TODO: Well, improve the info  poi
         const popup = new maplibregl.Popup({ offset: 30 }).setText(`${poi.name} ${poi.info}`);
 
         const iconUrl = `${SITUM_DOMAIN}${poi.categories[0].iconUrl}`;
         const selectedIconUrl = `${SITUM_DOMAIN}${poi.categories[0].selectedIconUrl}`;
-
-        console.log(poi.categories[0].iconUrl);
 
         const el = document.createElement('div');
         el.className = 'poi-marker';
