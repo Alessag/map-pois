@@ -12,6 +12,8 @@ const SITUM_DOMAIN = 'https://dashboard.situm.com';
 const MapView = () => {
   const building = useBuildingStore((state) => state.building);
   const pois = useBuildingStore((state) => state.getFilteredPois());
+  const selectedFloorId = useBuildingStore((state) => state.selectedFloorId);
+  const floors = useBuildingStore((state) => state.floors);
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -82,9 +84,14 @@ const MapView = () => {
 
       console.log('Building floors:', building.floors);
 
+      const getFloorById = (floorId: number | null) => {
+        if (floorId === null) return null;
+        return floors.find((floor) => floor.id === floorId) || null;
+      };
+
       map.addSource('floor-plan', {
         type: 'image',
-        url: building.floors[1].maps.mapUrl,
+        url: getFloorById(selectedFloorId)?.maps.mapUrl,
         coordinates: [
           [-8.426001, 43.352942],
           [-8.423549, 43.352517],
