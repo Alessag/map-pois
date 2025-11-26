@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import maplibregl, { type Map as MapLibreMap, type Marker } from 'maplibre-gl';
 
@@ -138,13 +138,15 @@ const MapView = () => {
   const buildingMarkerRef = useRef<Marker | null>(null);
   const poiMarkersRef = useRef<Map<number, Marker>>(new Map());
 
+  const [isMapReady, setIsMapReady] = useState(false);
+
   // Initialize the map once the building is available
   useEffect(() => {
     if (!building || !mapContainerRef.current || mapRef.current) return;
 
     const { lat, lng } = building.location;
-
     const paddedBounds = getPaddedBounds(building.corners ?? [], MAP_CONFIG.BOUNDS_PADDING_DEGREES);
+
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
       style: MAP_CONFIG.STYLE_URL,
@@ -177,7 +179,6 @@ const MapView = () => {
         data: createBuildingOutlineData(building.name, building.corners),
       });
 
-      // Add fill layer
       map.addLayer({
         id: LAYER_CONFIG.buildingFill.id,
         type: LAYER_CONFIG.buildingFill.type,
@@ -185,7 +186,6 @@ const MapView = () => {
         paint: LAYER_CONFIG.buildingFill.paint,
       });
 
-      // Add outline layer
       map.addLayer({
         id: LAYER_CONFIG.buildingBorder.id,
         type: LAYER_CONFIG.buildingBorder.type,
@@ -193,9 +193,40 @@ const MapView = () => {
         paint: LAYER_CONFIG.buildingBorder.paint,
       });
 
-      map.addSource('floor-plan', {
+      setIsMapReady(true);
+    });
+
+    return () => {
+      setIsMapReady(false);
+      marker.remove();
+      map.remove();
+      mapRef.current = null;
+      buildingMarkerRef.current = null;
+    };
+  }, [building]);
+
+  // use Effect 2: Manage floor layer
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !isMapReady) return;
+
+    const floorMapUrl = getFloorById(floors, selectedFloorId)?.maps.mapUrl;
+    const sourceId = 'floor-plan';
+    const layerId = LAYER_CONFIG.floorPlan.id;
+
+    // Remove existing floor plan if present
+    if (map.getLayer(layerId)) {
+      map.removeLayer(layerId);
+    }
+    if (map.getSource(sourceId)) {
+      map.removeSource(sourceId);
+    }
+
+    // Add new floor plan if URL exists
+    if (floorMapUrl) {
+      map.addSource(sourceId, {
         type: 'image',
-        url: getFloorById(floors, selectedFloorId)?.maps.mapUrl,
+        url: floorMapUrl,
         coordinates: [
           [-8.426001, 43.352942],
           [-8.423549, 43.352517],
@@ -205,58 +236,59 @@ const MapView = () => {
       });
 
       map.addLayer({
-        id: LAYER_CONFIG.floorPlan.id,
+        id: layerId,
         type: LAYER_CONFIG.floorPlan.type,
-        source: 'floor-plan',
+        source: sourceId,
         paint: LAYER_CONFIG.floorPlan.paint,
       });
+    }
+  }, [floors, isMapReady, selectedFloorId]);
 
-      poiMarkersRef.current.forEach((m) => m.remove());
-      poiMarkersRef.current.clear();
+  // Effect 3: Manage POI markers
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !isMapReady) return;
 
-      pois.forEach((poi) => {
-        const iconUrl = `${SITUM_DOMAIN}${poi.categories[0].iconUrl}`;
-        const selectedIconUrl = `${SITUM_DOMAIN}${poi.categories[0].selectedIconUrl}`;
+    poiMarkersRef.current.forEach((m) => m.remove());
+    poiMarkersRef.current.clear();
 
-        const el = createPoiMarkerElement({ iconUrl, selectedIconUrl });
+    pois.forEach((poi) => {
+      const iconUrl = `${SITUM_DOMAIN}${poi.categories[0].iconUrl}`;
+      const selectedIconUrl = `${SITUM_DOMAIN}${poi.categories[0].selectedIconUrl}`;
 
-        // TODO: Well, improve the info  poi
-        const popup = new maplibregl.Popup({ offset: 30 }).setText(`${poi.name} ${poi.info}`);
+      const el = createPoiMarkerElement({ iconUrl, selectedIconUrl });
 
-        popup.on('open', () => {
-          el.style.backgroundImage = `url(${el.dataset.selectedIconUrl})`;
-          setSelectedPoiId(poi.id);
-        });
+      // TODO: Improve the POI info display
+      const popup = new maplibregl.Popup({ offset: 30 }).setText(`${poi.name} ${poi.info}`);
 
-        popup.on('close', () => {
-          el.style.backgroundImage = `url(${el.dataset.iconUrl})`;
-          const currentSelected = useBuildingStore.getState().selectedPoiId;
-
-          if (currentSelected === poi.id) {
-            setSelectedPoiId(null);
-          }
-        });
-
-        const poiMarker = new maplibregl.Marker({ element: el })
-          .setLngLat([poi.location.lng, poi.location.lat])
-          .setPopup(popup)
-          .addTo(map);
-
-        poiMarkersRef.current.set(poi.id, poiMarker);
+      popup.on('open', () => {
+        el.style.backgroundImage = `url(${el.dataset.selectedIconUrl})`;
+        setSelectedPoiId(poi.id);
       });
+
+      popup.on('close', () => {
+        el.style.backgroundImage = `url(${el.dataset.iconUrl})`;
+        const currentSelected = useBuildingStore.getState().selectedPoiId;
+        if (currentSelected === poi.id) {
+          setSelectedPoiId(null);
+        }
+      });
+
+      const poiMarker = new maplibregl.Marker({ element: el })
+        .setLngLat([poi.location.lng, poi.location.lat])
+        .setPopup(popup)
+        .addTo(map);
+
+      poiMarkersRef.current.set(poi.id, poiMarker);
     });
 
     return () => {
       poiMarkersRef.current.forEach((m) => m.remove());
       poiMarkersRef.current.clear();
-      marker.remove();
-      map.remove();
-      mapRef.current = null;
-      buildingMarkerRef.current = null;
     };
-  }, [building, floors, pois, selectedFloorId, setSelectedPoiId]);
+  }, [isMapReady, pois, setSelectedPoiId]);
 
-  // Keep map/marker in sync if building location changes
+  // Effect 4: Keep map/marker in sync if building location changes
   useEffect(() => {
     if (!building || !mapRef.current) return;
 
@@ -269,7 +301,7 @@ const MapView = () => {
     }
   }, [building]);
 
-  // Reaccionar cuando se selecciona un POI desde el sidebar
+  // Effect 5: React when a POI is selected from the sidebar
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !selectedPoi) return;
