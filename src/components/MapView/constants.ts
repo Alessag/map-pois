@@ -2,7 +2,6 @@ export const SITUM_DOMAIN = 'https://dashboard.situm.com';
 export const MARKER_SIZE = 32;
 export const POI_FLY_TO_ZOOM = 20;
 export const POI_FLY_TO_DURATION = 500;
-export const BUILDING_MARKER_COLOR = '#2563eb';
 export const BUILDING_FILL_COLOR = '#088';
 export const BUILDING_FILL_OPACITY = 0.1;
 export const BUILDING_BORDER_WIDTH = 2;

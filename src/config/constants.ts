@@ -9,4 +9,4 @@ export const MAP_CONFIG = {
   STYLE_URL: 'https://demotiles.maplibre.org/style.json',
   BOUNDS_PADDING: 80,
   BOUNDS_PADDING_DEGREES: 0.0008,
-};
+} as const;

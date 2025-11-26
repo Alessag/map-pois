@@ -49,7 +49,7 @@ export function FloorSelector() {
             )}
             title={`Floor ${floor.level}: ${floor.name}`}
           >
-            {floor.name}
+            {floor.name ? floor.name : `Floor ${floor.level}`}
           </button>
         ))}
       </div>

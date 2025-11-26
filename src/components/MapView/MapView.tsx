@@ -5,13 +5,7 @@ import maplibregl, { type Map as MapLibreMap, type Marker } from 'maplibre-gl';
 import { MAP_CONFIG } from '../../config/constants.ts';
 import { useBuildingStore } from '../../store/useBuildingStore';
 
-import {
-  BUILDING_MARKER_COLOR,
-  LAYER_CONFIG,
-  POI_FLY_TO_DURATION,
-  POI_FLY_TO_ZOOM,
-  SITUM_DOMAIN,
-} from './constants.ts';
+import { LAYER_CONFIG, POI_FLY_TO_DURATION, POI_FLY_TO_ZOOM, SITUM_DOMAIN } from './constants.ts';
 import {
   createBuildingOutlineData,
   createPoiMarkerElement,
@@ -31,7 +25,6 @@ export const MapView = () => {
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
-  const buildingMarkerRef = useRef<Marker | null>(null);
   const poiMarkersRef = useRef<Map<number, Marker>>(new Map());
 
   const [isMapReady, setIsMapReady] = useState(false);
@@ -55,12 +48,7 @@ export const MapView = () => {
 
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
-    const marker = new maplibregl.Marker({ color: BUILDING_MARKER_COLOR })
-      .setLngLat([lng, lat])
-      .addTo(map);
-
     mapRef.current = map;
-    buildingMarkerRef.current = marker;
 
     map.on('load', () => {
       if (paddedBounds) {
@@ -94,41 +82,39 @@ export const MapView = () => {
 
     return () => {
       setIsMapReady(false);
-      marker.remove();
       map.remove();
       mapRef.current = null;
-      buildingMarkerRef.current = null;
     };
   }, [building]);
 
   // use Effect 2: Manage floor layer
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !isMapReady) return;
+    if (!map || !isMapReady || !building) return;
 
     const floorMapUrl = getFloorById(floors, selectedFloorId)?.maps.mapUrl;
     const sourceId = 'floor-plan';
     const layerId = LAYER_CONFIG.floorPlan.id;
 
-    // Remove existing floor plan if present
-    if (map.getLayer(layerId)) {
-      map.removeLayer(layerId);
-    }
-    if (map.getSource(sourceId)) {
-      map.removeSource(sourceId);
-    }
+    if (floorMapUrl && building.corners && building.corners.length >= 4) {
+      if (map.getLayer(layerId)) {
+        map.removeLayer(layerId);
+      }
+      if (map.getSource(sourceId)) {
+        map.removeSource(sourceId);
+      }
 
-    // Add new floor plan if URL exists
-    if (floorMapUrl) {
+      const imageCoordinates = building.corners.map((corner) => [corner.lng, corner.lat]) as [
+        [number, number],
+        [number, number],
+        [number, number],
+        [number, number],
+      ];
+
       map.addSource(sourceId, {
         type: 'image',
         url: floorMapUrl,
-        coordinates: [
-          [-8.426001, 43.352942],
-          [-8.423549, 43.352517],
-          [-8.423938, 43.351322],
-          [-8.42639, 43.351747],
-        ],
+        coordinates: imageCoordinates,
       });
 
       map.addLayer({
@@ -138,15 +124,16 @@ export const MapView = () => {
         paint: LAYER_CONFIG.floorPlan.paint,
       });
     }
-  }, [floors, isMapReady, selectedFloorId]);
+  }, [building, floors, isMapReady, selectedFloorId]);
 
   // Effect 3: Manage POI markers
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !isMapReady) return;
 
-    poiMarkersRef.current.forEach((m) => m.remove());
-    poiMarkersRef.current.clear();
+    const markers = poiMarkersRef.current;
+    markers.forEach((m) => m.remove());
+    markers.clear();
 
     pois.forEach((poi) => {
       const iconUrl = `${SITUM_DOMAIN}${poi.categories[0].iconUrl}`;
@@ -175,12 +162,12 @@ export const MapView = () => {
         .setPopup(popup)
         .addTo(map);
 
-      poiMarkersRef.current.set(poi.id, poiMarker);
+      markers.set(poi.id, poiMarker);
     });
 
     return () => {
-      poiMarkersRef.current.forEach((m) => m.remove());
-      poiMarkersRef.current.clear();
+      markers.forEach((m) => m.remove());
+      markers.clear();
     };
   }, [isMapReady, pois, setSelectedPoiId]);
 
@@ -191,10 +178,6 @@ export const MapView = () => {
     const { lat, lng } = building.location;
 
     mapRef.current.setCenter([lng, lat]);
-
-    if (buildingMarkerRef.current) {
-      buildingMarkerRef.current.setLngLat([lng, lat]);
-    }
   }, [building]);
 
   // Effect 5: React when a POI is selected from the sidebar

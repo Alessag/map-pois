@@ -79,4 +79,3 @@ class SitumService {
 }
 
 export const situmService = new SitumService();
-export default situmService;

@@ -36,7 +36,7 @@ const initialState = {
   floors: [],
   pois: [],
   selectedPoiId: null,
-  selectedFloorId: 14468,
+  selectedFloorId: null,
   searchQuery: '',
   isLoading: false,
   error: null,

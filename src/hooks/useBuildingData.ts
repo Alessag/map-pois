@@ -9,6 +9,7 @@ export function useBuildingData(buildingId: number) {
   const setPois = useBuildingStore((state) => state.setPois);
   const setLoading = useBuildingStore((state) => state.setLoading);
   const setError = useBuildingStore((state) => state.setError);
+  const setSelectedFloorId = useBuildingStore((state) => state.setSelectedFloorId);
 
   const isLoading = useBuildingStore((state) => state.isLoading);
   const error = useBuildingStore((state) => state.error);
@@ -28,6 +29,7 @@ export function useBuildingData(buildingId: number) {
         if (isMounted) {
           setBuilding(building);
           setFloors(Array.from(floors));
+          setSelectedFloorId(floors[0]?.id ?? null);
           setPois(pois);
           setLoading(false);
         }
