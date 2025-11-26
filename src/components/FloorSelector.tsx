@@ -2,10 +2,6 @@ import clsx from 'clsx';
 
 import { useBuildingStore } from '../store/useBuildingStore';
 
-/**
- * Floor selector component
- * Allows users to filter POIs by floor
- */
 export function FloorSelector() {
   const floors = useBuildingStore((state) => state.floors);
   const selectedFloorId = useBuildingStore((state) => state.selectedFloorId);
@@ -15,14 +11,16 @@ export function FloorSelector() {
     return null;
   }
 
-  // Sort floors by floor level
   const sortedFloors = [...floors].sort((a, b) => b.level - a.level);
+
+  const handleChangeFloor = (floorId: number | null) => {
+    setSelectedFloorId(floorId);
+  };
 
   return (
     <div className="space-y-2 border-2 border-black">
       <label className="text-sm font-medium text-gray-700">Filter by Floor</label>
       <div className="flex flex-wrap gap-2">
-        {/* All floors option */}
         <button
           onClick={() => setSelectedFloorId(null)}
           className={clsx(
@@ -37,13 +35,10 @@ export function FloorSelector() {
           All Floors
         </button>
 
-        {/* Individual floor buttons */}
         {sortedFloors.map((floor) => (
           <button
             key={floor.id}
-            onClick={() => {
-              setSelectedFloorId(floor.id);
-            }}
+            onClick={() => handleChangeFloor(floor.id)}
             className={clsx(
               'cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               {
