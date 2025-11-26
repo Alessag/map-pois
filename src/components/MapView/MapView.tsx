@@ -2,130 +2,26 @@ import { useEffect, useRef, useState } from 'react';
 
 import maplibregl, { type Map as MapLibreMap, type Marker } from 'maplibre-gl';
 
-import { MAP_CONFIG } from '../config/constants';
-import { useBuildingStore } from '../store/useBuildingStore';
+import { MAP_CONFIG } from '../../config/constants.ts';
+import { useBuildingStore } from '../../store/useBuildingStore';
+
+import {
+  BUILDING_MARKER_COLOR,
+  LAYER_CONFIG,
+  POI_FLY_TO_DURATION,
+  POI_FLY_TO_ZOOM,
+  SITUM_DOMAIN,
+} from './constants.ts';
+import {
+  createBuildingOutlineData,
+  createPoiMarkerElement,
+  getFloorById,
+  getPaddedBounds,
+} from './utils.ts';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const SITUM_DOMAIN = 'https://dashboard.situm.com';
-const MARKER_SIZE = 32;
-const POI_FLY_TO_ZOOM = 20;
-const POI_FLY_TO_DURATION = 500;
-const BUILDING_MARKER_COLOR = '#2563eb';
-const BUILDING_FILL_COLOR = '#088';
-const BUILDING_FILL_OPACITY = 0.1;
-const BUILDING_BORDER_WIDTH = 2;
-const FLOOR_PLAN_OPACITY = 0.85;
-
-type Corner = { lat: number; lng: number };
-
-const getPaddedBounds = (corners: Corner[], paddingDegrees: number) => {
-  if (!corners.length) return null;
-
-  const initialBounds = new maplibregl.LngLatBounds(
-    [corners[0].lng, corners[0].lat],
-    [corners[0].lng, corners[0].lat]
-  );
-
-  const bounds = corners
-    .slice(1)
-    .reduce((acc, corner) => acc.extend([corner.lng, corner.lat]), initialBounds);
-
-  if (!paddingDegrees) return bounds;
-
-  const sw = bounds.getSouthWest();
-  const ne = bounds.getNorthEast();
-
-  return new maplibregl.LngLatBounds(
-    [sw.lng - paddingDegrees, sw.lat - paddingDegrees],
-    [ne.lng + paddingDegrees, ne.lat + paddingDegrees]
-  );
-};
-
-const getFloorById = (floors: Floor[], floorId: number | null) => {
-  if (floorId === null) return null;
-  return floors.find((floor) => floor.id === floorId) || null;
-};
-
-// TODO: Move to maps utils or something like that
-//---------------
-interface CreatePoiMarkerElementParams {
-  iconUrl: string;
-  selectedIconUrl: string;
-  size?: number;
-}
-
-const createPoiMarkerElement = ({
-  iconUrl,
-  selectedIconUrl,
-  size = MARKER_SIZE,
-}: CreatePoiMarkerElementParams): HTMLDivElement => {
-  const el = document.createElement('div');
-
-  el.className = 'poi-marker';
-  el.style.backgroundImage = `url(${iconUrl})`;
-  el.style.width = `${size}px`;
-  el.style.height = `${size}px`;
-  el.style.backgroundSize = 'cover';
-  el.style.backgroundPosition = 'center';
-  el.style.cursor = 'pointer';
-
-  el.dataset.iconUrl = iconUrl;
-  el.dataset.selectedIconUrl = selectedIconUrl;
-
-  return el;
-};
-//-----------
-
-// TODO: Move to maps utils maybe(?)
-interface BuildingOutlineData {
-  type: 'Feature';
-  properties: { name: string };
-  geometry: {
-    type: 'Polygon';
-    coordinates: [number, number][][];
-  };
-}
-
-const createBuildingOutlineData = (name: string, corners: Corner[]): BuildingOutlineData => ({
-  type: 'Feature',
-  properties: { name },
-  geometry: {
-    type: 'Polygon',
-    coordinates: [corners.map((corner) => [corner.lng, corner.lat])],
-  },
-});
-
-//-----
-
-const LAYER_CONFIG = {
-  buildingFill: {
-    id: 'building-fill',
-    type: 'fill' as const,
-    paint: {
-      'fill-color': BUILDING_FILL_COLOR,
-      'fill-opacity': BUILDING_FILL_OPACITY,
-    },
-  },
-  buildingBorder: {
-    id: 'building-border',
-    type: 'line' as const,
-    paint: {
-      'line-color': BUILDING_FILL_COLOR,
-      'line-width': BUILDING_BORDER_WIDTH,
-    },
-  },
-  floorPlan: {
-    id: 'floor-plan-layer',
-    type: 'raster' as const,
-    paint: {
-      'raster-opacity': FLOOR_PLAN_OPACITY,
-      'raster-fade-duration': 0,
-    },
-  },
-} as const;
-
-const MapView = () => {
+export const MapView = () => {
   const building = useBuildingStore((state) => state.building);
   const pois = useBuildingStore((state) => state.getFilteredPois());
   const selectedFloorId = useBuildingStore((state) => state.selectedFloorId);
@@ -335,5 +231,3 @@ const MapView = () => {
 
   return <div ref={mapContainerRef} className="h-full w-full rounded-lg border" />;
 };
-
-export default MapView;

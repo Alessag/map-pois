@@ -1,4 +1,4 @@
-import MapView from './components/MapView';
+import { MapView } from './components/MapView/MapView';
 import { Sidebar } from './components/Sidebar';
 import { SITUM_CONFIG } from './config/constants';
 import { useBuildingData } from './hooks/useBuildingData';
