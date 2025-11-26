@@ -14,10 +14,14 @@ const MapView = () => {
   const pois = useBuildingStore((state) => state.getFilteredPois());
   const selectedFloorId = useBuildingStore((state) => state.selectedFloorId);
   const floors = useBuildingStore((state) => state.floors);
+  const selectedPoi = useBuildingStore((state) => state.getPoiById(state.selectedPoiId ?? -1));
+  const setSelectedPoiId = useBuildingStore((state) => state.setSelectedPoiId);
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
+  // Mapa para guardar referencias a los marcadores de POIs por ID
+  const markersRef = useRef<Map<number, Marker>>(new Map());
 
   // Initialize the map once the building is available
   useEffect(() => {
@@ -110,17 +114,19 @@ const MapView = () => {
         },
       });
 
-      pois.map((poi) => {
-        // Popup for each poi when marker is clicked
-        const popup = new maplibregl.Popup({ offset: 30 }).setText(poi.name);
+      // Limpiar marcadores anteriores
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current.clear();
 
-        // Icon URL from Situm dashboard
+      pois.map((poi) => {
+        // TODO: WEll, improve the info  poi
+        const popup = new maplibregl.Popup({ offset: 30 }).setText(`${poi.name} ${poi.info}`);
+
         const iconUrl = `${SITUM_DOMAIN}${poi.categories[0].iconUrl}`;
         const selectedIconUrl = `${SITUM_DOMAIN}${poi.categories[0].selectedIconUrl}`;
 
         console.log(poi.categories[0].iconUrl);
 
-        // Create a custom HTML element for the marker
         const el = document.createElement('div');
         el.className = 'poi-marker';
         el.style.backgroundImage = `url(${iconUrl})`;
@@ -130,31 +136,34 @@ const MapView = () => {
         el.style.backgroundPosition = 'center';
         el.style.cursor = 'pointer';
 
-        // Change icon when popup opens
         popup.on('open', () => {
           el.style.backgroundImage = `url(${selectedIconUrl})`;
+          setSelectedPoiId(poi.id);
         });
 
-        // Revert icon when popup closes
         popup.on('close', () => {
           el.style.backgroundImage = `url(${iconUrl})`;
+          setSelectedPoiId(null);
         });
 
-        //create a marker for each poi
-        new maplibregl.Marker({ element: el })
+        const poiMarker = new maplibregl.Marker({ element: el })
           .setLngLat([poi.location.lng, poi.location.lat])
           .setPopup(popup)
           .addTo(map);
+
+        markersRef.current.set(poi.id, poiMarker);
       });
     });
 
     return () => {
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current.clear();
       marker.remove();
       map.remove();
       mapRef.current = null;
       markerRef.current = null;
     };
-  }, [building, pois]);
+  }, [building, floors, pois, selectedFloorId, setSelectedPoiId]);
 
   // Keep map/marker in sync if building location changes
   useEffect(() => {
@@ -166,6 +175,33 @@ const MapView = () => {
       markerRef.current.setLngLat([lng, lat]);
     }
   }, [building]);
+
+  // Reaccionar cuando se selecciona un POI desde el sidebar
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !selectedPoi) return;
+
+    const marker = markersRef.current.get(selectedPoi.id);
+    if (!marker) return;
+
+    // Cerrar cualquier popup abierto primero
+    markersRef.current.forEach((m) => {
+      const popup = m.getPopup();
+      if (popup?.isOpen()) {
+        popup.remove();
+      }
+    });
+
+    // Abrir el popup del POI seleccionado
+    marker.togglePopup();
+
+    // Centrar el mapa en el POI seleccionado
+    map.flyTo({
+      center: [selectedPoi.location.lng, selectedPoi.location.lat],
+      zoom: 20,
+      duration: 500,
+    });
+  }, [selectedPoi]); // <-- Añadir selectedPoi como dependencia
 
   if (!building) {
     return (
