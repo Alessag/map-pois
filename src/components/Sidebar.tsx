@@ -1,7 +1,7 @@
 import { useBuildingStore } from '../store/useBuildingStore';
 
+import { POIList } from './POIList/POIList';
 import { FloorSelector } from './FloorSelector';
-import { POIList } from './POIList';
 import { SearchBar } from './SearchBar';
 
 export function Sidebar() {
