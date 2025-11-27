@@ -2,7 +2,6 @@ import Situm, { type Building, type Floor, type Poi, type PoiCategory } from '@s
 
 class SitumService {
   private sdk: Situm;
-  private initialized = false;
 
   constructor() {
     const apiKey = import.meta.env.VITE_SITUM_API_KEY;
@@ -15,17 +14,6 @@ class SitumService {
         apiKey,
       },
     });
-  }
-
-  async initialize(): Promise<void> {
-    if (this.initialized) return;
-
-    try {
-      this.initialized = true;
-    } catch (error) {
-      console.error('Failed to initialize Situm SDK:', error);
-      throw error;
-    }
   }
 
   async getBuildingInfo(buildingId: number): Promise<Building> {

@@ -42,8 +42,9 @@ function App() {
   return (
     <div className="flex h-screen flex-col">
       <header className="border-b bg-white px-4 py-4 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-800">{building.name}</h1>
-        {/* {building.address && <p className="text-sm text-gray-600">{building.address}</p>} */}
+        <h1 className="text-2xl font-bold text-gray-800">
+          {building.name ? building.name : 'Building'}
+        </h1>
       </header>
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

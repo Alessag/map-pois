@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+
 import clsx from 'clsx';
 
 import { useBuildingStore } from '../store/useBuildingStore';
@@ -7,15 +9,18 @@ export function FloorSelector() {
   const selectedFloorId = useBuildingStore((state) => state.selectedFloorId);
   const setSelectedFloorId = useBuildingStore((state) => state.setSelectedFloorId);
 
+  const sortedFloors = useCallback(() => [...floors].sort((a, b) => b.level - a.level), [floors]);
+
+  const handleChangeFloor = useCallback(
+    (floorId: number | null) => {
+      setSelectedFloorId(floorId);
+    },
+    [setSelectedFloorId]
+  );
+
   if (floors.length === 0) {
     return null;
   }
-
-  const sortedFloors = [...floors].sort((a, b) => b.level - a.level);
-
-  const handleChangeFloor = (floorId: number | null) => {
-    setSelectedFloorId(floorId);
-  };
 
   return (
     <div className="space-y-2">
@@ -35,7 +40,7 @@ export function FloorSelector() {
           All Floors
         </button>
 
-        {sortedFloors.map((floor) => (
+        {sortedFloors().map((floor) => (
           <button
             key={floor.id}
             onClick={() => handleChangeFloor(floor.id)}
