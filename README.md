@@ -79,15 +79,13 @@ yarn --version
 
 ## Configuration
 
-Create a `.env` file in the project root directory with the following variables:
+Copy the `.env.example` into a new `.env` file in the project root directory with the following variable:
 
 ```env
 VITE_SITUM_API_KEY=your_api_key
-VITE_SITUM_SDK_URL=your_sdk_url
-VITE_SITUM_BUILDING_ID=your_building_id
 ```
 
-Replace the placeholder values with your actual Situm credentials. Contact your Situm administrator if you do not have these credentials.
+Replace the placeholder value with your actual Situm credential. Contact your Situm administrator if you do not have these credential.
 
 ## Usage
 
