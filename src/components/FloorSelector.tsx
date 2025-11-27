@@ -18,8 +18,8 @@ export function FloorSelector() {
   };
 
   return (
-    <div className="space-y-2 border-2 border-black">
-      <label className="text-sm font-medium text-gray-700">Filter by Floor</label>
+    <div className="space-y-2">
+      <label className="text-sm font-light text-gray-700">Filter by Floor</label>
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setSelectedFloorId(null)}

@@ -220,11 +220,11 @@ export const MapView = () => {
 
   if (!building) {
     return (
-      <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-gray-300 text-sm text-gray-600">
+      <div className="flex h-full items-center justify-center border-gray-300 text-sm text-gray-600">
         Select or load a building to view it on the map.
       </div>
     );
   }
 
-  return <div ref={mapContainerRef} className="h-full w-full rounded-lg border" />;
+  return <div ref={mapContainerRef} className="h-full w-full" />;
 };
