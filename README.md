@@ -85,7 +85,7 @@ Copy the `.env.example` into a new `.env` file in the project root directory wit
 VITE_SITUM_API_KEY=your_api_key
 ```
 
-Replace the placeholder value with your actual Situm credential. Contact your Situm administrator if you do not have these credential.
+Replace the placeholder value with your actual Situm credential.
 
 ## Usage
 

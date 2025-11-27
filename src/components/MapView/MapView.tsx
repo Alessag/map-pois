@@ -5,7 +5,14 @@ import maplibregl, { type Map as MapLibreMap, type Marker } from 'maplibre-gl';
 import { MAP_CONFIG } from '../../config/constants.ts';
 import { useBuildingStore } from '../../store/useBuildingStore';
 
-import { LAYER_CONFIG, POI_FLY_TO_DURATION, POI_FLY_TO_ZOOM } from './constants.ts';
+import {
+  BUILDING_NUMBER_OF_CORNERS,
+  DEFAULT_POI_ICON_DATA_URI,
+  DEFAULT_POI_SELECTED_ICON_DATA_URI,
+  LAYER_CONFIG,
+  POI_FLY_TO_DURATION,
+  POI_FLY_TO_ZOOM,
+} from './constants.ts';
 import {
   createBuildingOutlineData,
   createPoiMarkerElement,
@@ -36,7 +43,11 @@ export const MapView = () => {
     if (!building || !mapContainerRef.current || mapRef.current) return;
 
     const { lat, lng } = building.location;
-    const paddedBounds = getPaddedBounds(building.corners ?? [], MAP_CONFIG.BOUNDS_PADDING_DEGREES);
+
+    const paddedBounds =
+      building.corners && building.corners.length >= BUILDING_NUMBER_OF_CORNERS
+        ? getPaddedBounds(building.corners, MAP_CONFIG.BOUNDS_PADDING_DEGREES)
+        : undefined;
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
@@ -45,7 +56,7 @@ export const MapView = () => {
       zoom: MAP_CONFIG.DEFAULT_ZOOM,
       minZoom: MAP_CONFIG.MIN_ZOOM,
       maxZoom: MAP_CONFIG.MAX_ZOOM,
-      maxBounds: paddedBounds ?? undefined,
+      maxBounds: paddedBounds,
     });
 
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
@@ -98,7 +109,7 @@ export const MapView = () => {
     const sourceId = 'floor-plan';
     const layerId = LAYER_CONFIG.floorPlan.id;
 
-    if (floorMapUrl && building.corners && building.corners.length >= 4) {
+    if (floorMapUrl && building.corners && building.corners.length >= BUILDING_NUMBER_OF_CORNERS) {
       if (map.getLayer(layerId)) {
         map.removeLayer(layerId);
       }
@@ -140,8 +151,12 @@ export const MapView = () => {
     pois.forEach((poi) => {
       const poiCategory = getPoiCategoryById(poi.categoryId);
 
-      const iconUrl = normalizeIconUrl(poiCategory?.iconUrl ?? '');
-      const selectedIconUrl = normalizeIconUrl(poiCategory?.selectedIconUrl ?? '');
+      const iconUrl = poiCategory?.iconUrl
+        ? normalizeIconUrl(poiCategory.iconUrl)
+        : DEFAULT_POI_ICON_DATA_URI;
+      const selectedIconUrl = poiCategory?.selectedIconUrl
+        ? normalizeIconUrl(poiCategory.selectedIconUrl)
+        : DEFAULT_POI_SELECTED_ICON_DATA_URI;
 
       const el = createPoiMarkerElement({ iconUrl, selectedIconUrl });
 
@@ -183,7 +198,7 @@ export const MapView = () => {
       markers.forEach((m) => m.remove());
       markers.clear();
     };
-  }, [isMapReady, pois, setSelectedPoiId]);
+  }, [getPoiCategoryById, isMapReady, pois, setSelectedPoiId]);
 
   // Keep map/marker in sync if building location changes
   useEffect(() => {

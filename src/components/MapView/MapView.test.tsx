@@ -90,9 +90,31 @@ describe('MapView', () => {
 
     render(<MapView />);
 
-    // Wait for map load event to fire
     await vi.waitFor(() => {
       expect(maplibregl.default.Marker).toHaveBeenCalled();
     });
+  });
+
+  it('uses fallback icons when POI category is missing', async () => {
+    const maplibregl = await import('maplibre-gl');
+
+    vi.mocked(useBuildingStore).mockImplementation((selector) => {
+      const state = createMockStoreState({
+        building: mockBuilding,
+        floors: mockFloors,
+        selectedFloorId: 1,
+        getFilteredPois: vi.fn(() => mockPois),
+        getPoiCategoryById: vi.fn(() => undefined),
+      });
+      return selector(state);
+    });
+
+    render(<MapView />);
+
+    await vi.waitFor(() => {
+      expect(maplibregl.default.Marker).toHaveBeenCalled();
+    });
+
+    expect(maplibregl.default.Marker).toHaveBeenCalledTimes(mockPois.length);
   });
 });

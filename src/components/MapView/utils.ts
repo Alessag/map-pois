@@ -4,8 +4,11 @@ import maplibregl from 'maplibre-gl';
 import { MARKER_SIZE, SITUM_DOMAIN } from './constants';
 import type { BuildingOutlineData, Corner, CreatePoiMarkerElementParams } from './types';
 
-export const getPaddedBounds = (corners: Corner[], paddingDegrees: number) => {
-  if (!corners.length) return null;
+export const getPaddedBounds = (
+  corners: Corner[],
+  paddingDegrees: number
+): maplibregl.LngLatBounds | undefined => {
+  if (!corners.length) return undefined;
 
   const initialBounds = new maplibregl.LngLatBounds(
     [corners[0].lng, corners[0].lat],
@@ -45,8 +48,6 @@ export const getFloorById = (floors: Floor[], floorId: number | null) => {
 };
 
 export const normalizeIconUrl = (url: string): string => {
-  if (!url) return '';
-
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }

@@ -11,7 +11,6 @@ import {
   normalizeIconUrl,
 } from './utils';
 
-// Mock MapLibre GL
 vi.mock('maplibre-gl', () => ({
   default: {
     LngLatBounds: vi.fn().mockImplementation((sw, ne) => ({
@@ -29,10 +28,6 @@ describe('MapView Utils', () => {
     vi.clearAllMocks();
   });
   describe('normalizeIconUrl', () => {
-    test('should return empty string for empty input', () => {
-      expect(normalizeIconUrl('')).toBe('');
-    });
-
     test('should return URL unchanged if starts with http://', () => {
       const url = 'http://example.com/icon.png';
 
@@ -59,10 +54,10 @@ describe('MapView Utils', () => {
   });
 
   describe('getPaddedBounds', () => {
-    test('should return null for empty corners array', () => {
+    test('should return undefined for empty corners array', () => {
       const result = getPaddedBounds([], 0.001);
 
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
   });
 
@@ -74,9 +69,19 @@ describe('MapView Utils', () => {
       ];
       const result = createBuildingOutlineData('Building', corners);
 
-      expect(result.type).toBe('Feature');
-      expect(result.properties).toBeDefined();
-      expect(result.geometry).toBeDefined();
+      expect(result).toStrictEqual({
+        geometry: {
+          coordinates: [
+            [
+              [-3, 40],
+              [-2, 41],
+            ],
+          ],
+          type: 'Polygon',
+        },
+        properties: { name: 'Building' },
+        type: 'Feature',
+      });
     });
   });
 
