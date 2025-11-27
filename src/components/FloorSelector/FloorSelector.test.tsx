@@ -2,7 +2,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { beforeEach, describe, expect, vi } from 'vitest';
 
 import type { BuildingStore } from '../../store/useBuildingStore';
-import { mockFloors } from '../../test/fixtures';
+import { createMockStoreState, mockFloors } from '../../test/mocks';
 
 import { FloorSelector } from './FloorSelector';
 
@@ -11,11 +11,13 @@ const mockSetSelectedFloorId = vi.fn();
 vi.mock('../../store/useBuildingStore', () => {
   return {
     useBuildingStore: (selector: (state: BuildingStore) => unknown) =>
-      selector({
-        floors: mockFloors,
-        selectedFloorId: null,
-        setSelectedFloorId: mockSetSelectedFloorId,
-      } as BuildingStore),
+      selector(
+        createMockStoreState({
+          floors: mockFloors,
+          selectedFloorId: null,
+          setSelectedFloorId: mockSetSelectedFloorId,
+        }) as BuildingStore
+      ),
   };
 });
 
@@ -24,7 +26,7 @@ describe('FloorSelector', () => {
     mockSetSelectedFloorId.mockClear();
   });
 
-  it('renders floor buttons and calls setter on click', () => {
+  test('renders floor buttons and calls setter on click', () => {
     const { getByText, getByRole } = render(<FloorSelector />);
 
     const allFloors = getByText('All Floors');

@@ -1,6 +1,6 @@
-import { describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { mockFloors } from '../../test/fixtures';
+import { mockFloors } from '../../test/mocks';
 
 import { SITUM_DOMAIN } from './constants';
 import {
@@ -11,7 +11,23 @@ import {
   normalizeIconUrl,
 } from './utils';
 
+// Mock MapLibre GL
+vi.mock('maplibre-gl', () => ({
+  default: {
+    LngLatBounds: vi.fn().mockImplementation((sw, ne) => ({
+      _sw: sw,
+      _ne: ne,
+      extend: vi.fn(),
+      getSouthWest: vi.fn(() => ({ lng: -3.70379, lat: 40.416775 })),
+      getNorthEast: vi.fn(() => ({ lng: -3.7035, lat: 40.417 })),
+    })),
+  },
+}));
+
 describe('MapView Utils', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
   describe('normalizeIconUrl', () => {
     test('should return empty string for empty input', () => {
       expect(normalizeIconUrl('')).toBe('');

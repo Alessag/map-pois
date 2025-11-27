@@ -1,5 +1,5 @@
 import { MapView } from './components/MapView/MapView';
-import { Sidebar } from './components/Sidebar';
+import { Sidebar } from './components/Sidebar/Sidebar';
 import { SITUM_CONFIG } from './config/constants';
 import { useBuildingData } from './hooks/useBuildingData';
 import { useBuildingStore } from './store/useBuildingStore';

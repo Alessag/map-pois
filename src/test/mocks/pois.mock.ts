@@ -1,0 +1,48 @@
+import type { Poi } from '@situm/sdk-js';
+
+export const mockPois: Poi[] = [
+  {
+    id: 1,
+    buildingId: 7033,
+    floorId: 1,
+    name: 'Main Entrance',
+    categoryId: 1,
+    categoryName: 'Access',
+    location: { lat: 40.4168, lng: -3.7037 },
+    info: 'Main building entrance',
+    customFields: {},
+  } as Poi,
+  {
+    id: 2,
+    buildingId: 7033,
+    floorId: 1,
+    name: 'Coffee Shop',
+    categoryId: 2,
+    categoryName: 'Food & Drink',
+    location: { lat: 40.41685, lng: -3.70365 },
+    info: 'Best coffee in town',
+    customFields: {},
+  } as Poi,
+  {
+    id: 3,
+    buildingId: 7033,
+    floorId: 2,
+    name: 'Conference Room A',
+    categoryId: 3,
+    categoryName: 'Meeting Rooms',
+    location: { lat: 40.4169, lng: -3.7036 },
+    info: 'Large conference room with AV equipment',
+    customFields: {},
+  } as Poi,
+  {
+    id: 4,
+    buildingId: 7033,
+    floorId: 2,
+    name: 'Office 201',
+    categoryId: 4,
+    categoryName: 'Offices',
+    location: { lat: 40.41692, lng: -3.70358 },
+    info: '',
+    customFields: {},
+  } as Poi,
+];

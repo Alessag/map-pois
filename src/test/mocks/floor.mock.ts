@@ -29,5 +29,3 @@ export const mockFloors: Floor[] = [
     },
   } as Floor,
 ];
-
-export const mockEmptyFloors: Floor[] = [];
