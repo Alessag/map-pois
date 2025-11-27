@@ -1,7 +1,7 @@
 import type { Building, Floor, Poi, PoiCategory } from '@situm/sdk-js';
 import { create } from 'zustand';
 
-interface BuildingStore {
+export interface BuildingStore {
   building: Building | null;
   floors: Floor[];
   pois: Poi[];

@@ -1,5 +1,6 @@
 import { useBuildingStore } from '../store/useBuildingStore';
 
+import { FloorSelector } from './FloorSelector/FloorSelector';
 import { POIList } from './POIList/POIList';
 import { SearchBar } from './SearchBar/SearchBar';
 

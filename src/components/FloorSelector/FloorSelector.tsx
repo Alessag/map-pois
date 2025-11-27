@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 import clsx from 'clsx';
 
-import { useBuildingStore } from '../store/useBuildingStore';
+import { useBuildingStore } from '../../store/useBuildingStore';
 
 export function FloorSelector() {
   const floors = useBuildingStore((state) => state.floors);
@@ -27,6 +27,7 @@ export function FloorSelector() {
       <label className="text-sm font-light text-gray-700">Filter by Floor</label>
       <div className="flex flex-wrap gap-2">
         <button
+          aria-label="all-floors"
           onClick={() => setSelectedFloorId(null)}
           className={clsx(
             'cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-colors',
@@ -43,6 +44,7 @@ export function FloorSelector() {
         {sortedFloors().map((floor) => (
           <button
             key={floor.id}
+            aria-label={`floor-${floor.id}`}
             onClick={() => handleChangeFloor(floor.id)}
             className={clsx(
               'cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-colors',
