@@ -1,4 +1,4 @@
-import Situm from '@situm/sdk-js';
+import Situm, { type Building, type Floor, type Poi, type PoiCategory } from '@situm/sdk-js';
 
 class SitumService {
   private sdk: Situm;
@@ -28,7 +28,7 @@ class SitumService {
     }
   }
 
-  async getBuildingInfo(buildingId: number) {
+  async getBuildingInfo(buildingId: number): Promise<Building> {
     try {
       const building = await this.sdk.cartography.getBuildingById(buildingId);
       return building;
@@ -38,7 +38,7 @@ class SitumService {
     }
   }
 
-  async getFloors(buildingId: number) {
+  async getFloors(buildingId: number): Promise<Floor[]> {
     try {
       const floors = await this.sdk.cartography.getFloors({ buildingId });
       // Adjust property name to match expected format
@@ -56,7 +56,7 @@ class SitumService {
     }
   }
 
-  async getPOIs(buildingId: number) {
+  async getPOIs(buildingId: number): Promise<Poi[]> {
     try {
       const pois = await this.sdk.cartography.getPois({ buildingId });
       return pois;
@@ -66,12 +66,14 @@ class SitumService {
     }
   }
 
-  async getPOICategories() {
+  async getPOICategories(): Promise<PoiCategory[]> {
     const categories = await this.sdk.cartography.getPoiCategories();
     return categories;
   }
 
-  async getBuildingData(buildingId: number) {
+  async getBuildingData(
+    buildingId: number
+  ): Promise<{ building: Building; floors: Floor[]; pois: Poi[]; categories: PoiCategory[] }> {
     try {
       const [building, floors, pois, categories] = await Promise.all([
         this.getBuildingInfo(buildingId),
