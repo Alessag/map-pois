@@ -1,8 +1,7 @@
 import { useBuildingStore } from '../store/useBuildingStore';
 
 import { POIList } from './POIList/POIList';
-import { FloorSelector } from './FloorSelector';
-import { SearchBar } from './SearchBar';
+import { SearchBar } from './SearchBar/SearchBar';
 
 export function Sidebar() {
   const pois = useBuildingStore((state) => state.pois);
