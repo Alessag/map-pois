@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { mockFloors } from '../../test/mocks';
+import { mockFloors } from '../../../test/mocks';
+import { SITUM_DOMAIN } from '../constants/constants';
 
-import { SITUM_DOMAIN } from './constants';
 import {
   createBuildingOutlineData,
   createPoiMarkerElement,

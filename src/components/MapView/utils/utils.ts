@@ -1,8 +1,8 @@
 import type { Floor } from '@situm/sdk-js';
 import maplibregl from 'maplibre-gl';
 
-import { MARKER_SIZE, SITUM_DOMAIN } from './constants';
-import type { BuildingOutlineData, Corner, CreatePoiMarkerElementParams } from './types';
+import { MARKER_SIZE, SITUM_DOMAIN } from '../constants/constants';
+import type { BuildingOutlineData, Corner, CreatePoiMarkerElementParams } from '../types/types';
 
 export const getPaddedBounds = (
   corners: Corner[],

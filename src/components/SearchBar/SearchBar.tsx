@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { useBuildingStore } from '../../store/useBuildingStore';
-import { ClearIcon } from '../Icons/ClearIcon';
-import { SearchIcon } from '../Icons/SearchIcon';
+import { ClearIcon } from '../Icons/ClearIcon/ClearIcon';
+import { SearchIcon } from '../Icons/SearchIcon/SearchIcon';
 
 export function SearchBar() {
   const setSearchQuery = useBuildingStore((state) => state.setSearchQuery);

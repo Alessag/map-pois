@@ -12,14 +12,14 @@ import {
   LAYER_CONFIG,
   POI_FLY_TO_DURATION,
   POI_FLY_TO_ZOOM,
-} from './constants.ts';
+} from './constants/constants.ts';
 import {
   createBuildingOutlineData,
   createPoiMarkerElement,
   getFloorById,
   getPaddedBounds,
   normalizeIconUrl,
-} from './utils.ts';
+} from './utils/utils.ts';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 

@@ -1,6 +1,6 @@
-import { DefaultPoiIconSvg } from '../Icons/DefaultPoiIcon';
-import { DefaultPoiSelectedIconSvg } from '../Icons/DefaultPoiSelectedIcon';
-import { svgToDataUri } from '../Icons/utils';
+import { svgToDataUri } from '../../../utils/utils';
+import { DefaultPoiIconSvg } from '../../Icons/DefaultPoiIcon/DefaultPoiIcon';
+import { DefaultPoiSelectedIconSvg } from '../../Icons/DefaultPoiSelectedIcon/DefaultPoiSelectedIcon';
 
 export const SITUM_DOMAIN = 'https://dashboard.situm.com';
 export const BUILDING_NUMBER_OF_CORNERS = 4;

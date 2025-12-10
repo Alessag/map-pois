@@ -1,4 +1,4 @@
-export { ClearIcon } from './ClearIcon';
-export { DefaultPoiIcon } from './DefaultPoiIcon';
-export { DefaultPoiSelectedIcon } from './DefaultPoiSelectedIcon';
-export { SearchIcon } from './SearchIcon';
+export { ClearIcon } from './ClearIcon/ClearIcon';
+export { DefaultPoiIcon } from './DefaultPoiIcon/DefaultPoiIcon';
+export { DefaultPoiSelectedIcon } from './DefaultPoiSelectedIcon/DefaultPoiSelectedIcon';
+export { SearchIcon } from './SearchIcon/SearchIcon';
